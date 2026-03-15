@@ -1,10 +1,10 @@
 .recording-overlay {
   height: 36px;
-  width: 172px;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  width: fit-content;
+  display: flex;
   align-items: center;
-  padding: 6px;
+  justify-content: center;
+  padding: 6px 12px;
   background: #000000cc;
   border-radius: 18px;
   opacity: 0;
@@ -12,29 +12,11 @@
   box-sizing: border-box;
 }
 
-.overlay-left {
-  display: flex;
-  align-items: center;
-}
-
-.overlay-middle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.overlay-right {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-
 .bars-container {
   display: flex;
   align-items: end;
   justify-content: center;
   gap: 3px;
-  padding-bottom: 0px;
   height: 24px;
   overflow: hidden;
 }
@@ -68,28 +50,4 @@
   50% {
     opacity: 1;
   }
-}
-
-.cancel-button {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition:
-    background-color 150ms ease-out,
-    transform 100ms ease-out;
-  flex-shrink: 0;
-}
-
-.cancel-button:hover {
-  background: #faa2ca33;
-  transform: scale(1.05);
-}
-
-.cancel-button:active {
-  transform: scale(0.95);
 }
