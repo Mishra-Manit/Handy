@@ -662,6 +662,15 @@ pub fn change_word_correction_threshold_setting(
 
 #[tauri::command]
 #[specta::specta]
+pub fn change_extra_recording_buffer_setting(app: AppHandle, ms: u64) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.extra_recording_buffer_ms = ms;
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
 pub fn change_paste_method_setting(app: AppHandle, method: String) -> Result<(), String> {
     let mut settings = settings::get_settings(&app);
     let parsed = match method.as_str() {
@@ -1044,6 +1053,15 @@ pub fn change_append_trailing_space_setting(app: AppHandle, enabled: bool) -> Re
 
 #[tauri::command]
 #[specta::specta]
+pub fn change_lazy_stream_close_setting(app: AppHandle, enabled: bool) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.lazy_stream_close = enabled;
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
 pub fn change_app_language_setting(app: AppHandle, language: String) -> Result<(), String> {
     let mut settings = settings::get_settings(&app);
     settings.app_language = language.clone();
@@ -1066,4 +1084,49 @@ pub fn change_show_tray_icon_setting(app: AppHandle, enabled: bool) -> Result<()
     tray::set_tray_visibility(&app, enabled);
 
     Ok(())
+}
+
+/// Save accelerator settings, re-apply globals, and unload the model so it
+/// reloads with the new backend on next transcription.
+fn apply_and_reload_accelerator(app: &AppHandle, s: settings::AppSettings) {
+    settings::write_settings(app, s);
+    crate::managers::transcription::apply_accelerator_settings(app);
+
+    let tm = app.state::<std::sync::Arc<crate::managers::transcription::TranscriptionManager>>();
+    if tm.is_model_loaded() {
+        if let Err(e) = tm.unload_model() {
+            log::warn!("Failed to unload model after accelerator change: {e}");
+        }
+    }
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_whisper_accelerator_setting(
+    app: AppHandle,
+    accelerator: settings::WhisperAcceleratorSetting,
+) -> Result<(), String> {
+    let mut s = settings::get_settings(&app);
+    s.whisper_accelerator = accelerator;
+    apply_and_reload_accelerator(&app, s);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_ort_accelerator_setting(
+    app: AppHandle,
+    accelerator: settings::OrtAcceleratorSetting,
+) -> Result<(), String> {
+    let mut s = settings::get_settings(&app);
+    s.ort_accelerator = accelerator;
+    apply_and_reload_accelerator(&app, s);
+    Ok(())
+}
+
+/// Return which ORT accelerators are compiled into this build.
+#[tauri::command]
+#[specta::specta]
+pub fn get_available_accelerators() -> crate::managers::transcription::AvailableAccelerators {
+    crate::managers::transcription::get_available_accelerators()
 }
