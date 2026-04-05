@@ -139,7 +139,8 @@
       "translation": "Può tradurre in inglese",
       "translate": "Traduci in inglese",
       "singleLanguage": "Supporta solo questa lingua",
-      "languageOnly": "Solo {{language}}"
+      "languageOnly": "Solo {{language}}",
+      "cloud": "Cloud"
     },
     "cancel": "Annulla",
     "cancelDownload": "Annulla download"
@@ -164,6 +165,9 @@
         "allLanguages": "Tutte le lingue"
       },
       "noModelsMatch": "Nessun modello corrisponde a questo filtro.",
+      "groqApiKey": "Groq API Key",
+      "groqApiKeyDescription": "Required for Groq Whisper Turbo. Get your key at console.groq.com.",
+      "groqApiKeyPlaceholder": "gsk_...",
       "yourModels": "Modelli scaricati",
       "availableModels": "Disponibili per il Download"
     },

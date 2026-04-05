@@ -141,7 +141,8 @@
       "multiLanguage": "Multi-language",
       "languageOnly": "{{language}} Only",
       "translation": "Can translate to English",
-      "translate": "Translate to English"
+      "translate": "Translate to English",
+      "cloud": "Cloud"
     }
   },
   "settings": {
@@ -207,7 +208,10 @@
         "translation": "Translation",
         "allLanguages": "All Languages"
       },
-      "noModelsMatch": "No models match this filter."
+      "noModelsMatch": "No models match this filter.",
+      "groqApiKey": "Groq API Key",
+      "groqApiKeyDescription": "Required for Groq Whisper Turbo. Get your key at console.groq.com.",
+      "groqApiKeyPlaceholder": "gsk_..."
     },
     "sound": {
       "title": "Sound",

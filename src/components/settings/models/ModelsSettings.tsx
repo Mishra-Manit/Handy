@@ -4,7 +4,9 @@ import { ask } from "@tauri-apps/plugin-dialog";
 import { ChevronDown, Globe } from "lucide-react";
 import type { ModelCardStatus } from "@/components/onboarding";
 import { ModelCard } from "@/components/onboarding";
+import { ApiKeyField } from "@/components/settings/PostProcessingSettingsApi/ApiKeyField";
 import { useModelStore } from "@/stores/modelStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { LANGUAGES } from "@/lib/constants/languages.ts";
 import type { ModelInfo } from "@/bindings";
 
@@ -21,6 +23,9 @@ export const ModelsSettings: React.FC = () => {
   const [languageSearch, setLanguageSearch] = useState("");
   const languageDropdownRef = useRef<HTMLDivElement>(null);
   const languageSearchInputRef = useRef<HTMLInputElement>(null);
+  const { settings, updatePostProcessApiKey } = useSettingsStore();
+  const groqApiKey = settings?.post_process_api_keys?.groq ?? "";
+
   const {
     models,
     currentModel,
@@ -326,6 +331,22 @@ export const ModelsSettings: React.FC = () => {
                 showRecommended={false}
               />
             ))}
+            {currentModel === "groq-whisper-turbo" && (
+              <div className="mt-3 p-4 rounded-xl border-2 border-mid-gray/20 space-y-2">
+                <label className="text-sm font-medium text-text/80">
+                  {t("settings.models.groqApiKey")}
+                </label>
+                <p className="text-xs text-text/50">
+                  {t("settings.models.groqApiKeyDescription")}
+                </p>
+                <ApiKeyField
+                  value={groqApiKey}
+                  onBlur={(value: string) => updatePostProcessApiKey("groq", value)}
+                  disabled={false}
+                  placeholder={t("settings.models.groqApiKeyPlaceholder")}
+                />
+              </div>
+            )}
           </div>
 
           {/* Available Models Section */}

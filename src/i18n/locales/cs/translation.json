@@ -139,7 +139,8 @@
       "translation": "Umí překládat do angličtiny",
       "translate": "Přeložit do angličtiny",
       "singleLanguage": "Podporuje pouze tento jazyk",
-      "languageOnly": "Pouze {{language}}"
+      "languageOnly": "Pouze {{language}}",
+      "cloud": "Cloud"
     },
     "cancel": "Zrušit",
     "cancelDownload": "Zrušit stahování"
@@ -164,6 +165,9 @@
         "allLanguages": "Všechny jazyky"
       },
       "noModelsMatch": "Tomuto filtru neodpovídají žádné modely.",
+      "groqApiKey": "Groq API Key",
+      "groqApiKeyDescription": "Required for Groq Whisper Turbo. Get your key at console.groq.com.",
+      "groqApiKeyPlaceholder": "gsk_...",
       "yourModels": "Stažené modely",
       "availableModels": "Dostupné ke stažení"
     },

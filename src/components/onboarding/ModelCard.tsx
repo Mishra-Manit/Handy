@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import {
   Check,
+  Cloud,
   Download,
   Globe,
   Languages,
@@ -155,6 +156,12 @@ const ModelCard: React.FC<ModelCardProps> = ({
                 {t("modelSelector.switching")}
               </Badge>
             )}
+            {model.is_cloud && (
+              <span className="flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-400">
+                <Cloud className="h-3 w-3" />
+                {t("modelSelector.capabilities.cloud")}
+              </span>
+            )}
           </div>
           <p className="text-text/60 text-sm leading-relaxed">
             {displayDescription}
@@ -222,7 +229,7 @@ const ModelCard: React.FC<ModelCardProps> = ({
             <span>{formatModelSize(Number(model.size_mb))}</span>
           </span>
         )}
-        {onDelete && (status === "available" || status === "active") && (
+        {onDelete && !model.is_cloud && (status === "available" || status === "active") && (
           <Button
             variant="ghost"
             size="sm"

@@ -141,7 +141,8 @@
       "multiLanguage": "다국어",
       "languageOnly": "{{language}} 전용",
       "translation": "영어로 번역 가능",
-      "translate": "영어로 번역"
+      "translate": "영어로 번역",
+      "cloud": "Cloud"
     }
   },
   "settings": {
@@ -230,7 +231,10 @@
         "translation": "번역",
         "allLanguages": "모든 언어"
       },
-      "noModelsMatch": "이 필터에 맞는 모델이 없습니다."
+      "noModelsMatch": "이 필터에 맞는 모델이 없습니다.",
+      "groqApiKey": "Groq API Key",
+      "groqApiKeyDescription": "Required for Groq Whisper Turbo. Get your key at console.groq.com.",
+      "groqApiKeyPlaceholder": "gsk_..."
     },
     "advanced": {
       "title": "고급",

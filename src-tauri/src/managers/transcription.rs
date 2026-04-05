@@ -43,6 +43,7 @@ enum LoadedEngine {
     SenseVoice(SenseVoiceModel),
     GigaAM(GigaAMModel),
     Canary(CanaryModel),
+    GroqWhisper,
 }
 
 /// RAII guard that clears the `is_loading` flag and notifies waiters on drop.
@@ -282,6 +283,34 @@ impl TranscriptionManager {
             return Err(anyhow::anyhow!(error_msg));
         }
 
+        // Cloud models — no local file to load
+        if matches!(model_info.engine_type, EngineType::GroqWhisper) {
+            let loaded_engine = LoadedEngine::GroqWhisper;
+
+            {
+                let mut engine = self.engine.lock().unwrap();
+                *engine = Some(loaded_engine);
+            }
+            {
+                let mut current_model = self.current_model_id.lock().unwrap();
+                *current_model = Some(model_id.to_string());
+            }
+            self.touch_activity();
+
+            let _ = self.app_handle.emit(
+                "model-state-changed",
+                ModelStateEvent {
+                    event_type: "loading_completed".to_string(),
+                    model_id: Some(model_id.to_string()),
+                    model_name: Some(model_info.name.clone()),
+                    error: None,
+                },
+            );
+
+            info!("Groq Whisper cloud engine ready");
+            return Ok(());
+        }
+
         let model_path = self.model_manager.get_model_path(model_id)?;
 
         // Create appropriate engine based on model type
@@ -366,6 +395,9 @@ impl TranscriptionManager {
                     anyhow::anyhow!(error_msg)
                 })?;
                 LoadedEngine::Canary(engine)
+            }
+            EngineType::GroqWhisper => {
+                unreachable!("GroqWhisper is handled before this match")
             }
         };
 
@@ -593,6 +625,41 @@ impl TranscriptionManager {
                                 .transcribe(&audio, &options)
                                 .map_err(|e| anyhow::anyhow!("Canary transcription failed: {}", e))
                         }
+                        LoadedEngine::GroqWhisper => {
+                            let groq_language = if validated_language == "auto" {
+                                None
+                            } else {
+                                let normalized = match validated_language.as_str() {
+                                    "zh-Hans" | "zh-Hant" => "zh".to_string(),
+                                    other => other.to_string(),
+                                };
+                                Some(normalized)
+                            };
+
+                            let api_key = settings
+                                .post_process_api_keys
+                                .get("groq")
+                                .cloned()
+                                .unwrap_or_default();
+
+                            // Bridge sync → async: block_in_place lets us .await
+                            // the async Groq client without creating a nested runtime.
+                            let text = tokio::task::block_in_place(|| {
+                                tokio::runtime::Handle::current().block_on(
+                                    crate::managers::groq_transcription::transcribe_with_groq(
+                                        &api_key,
+                                        &audio,
+                                        groq_language.as_deref(),
+                                        &settings.custom_words,
+                                    ),
+                                )
+                            })?;
+
+                            Ok(transcribe_rs::TranscriptionResult {
+                                text,
+                                segments: Some(vec![]),
+                            })
+                        }
                     }
                 },
             ));
@@ -646,15 +713,17 @@ impl TranscriptionManager {
             }
         };
 
-        // Apply word correction if custom words are configured.
-        // Skip for Whisper models since custom words are already passed as initial_prompt.
-        let is_whisper = self
+        let engine_type = self
             .model_manager
             .get_model_info(&settings.selected_model)
-            .map(|info| matches!(info.engine_type, EngineType::Whisper))
-            .unwrap_or(false);
+            .map(|info| info.engine_type.clone());
 
-        let corrected_result = if !settings.custom_words.is_empty() && !is_whisper {
+        let is_whisper_or_groq = matches!(
+            engine_type,
+            Some(EngineType::Whisper) | Some(EngineType::GroqWhisper)
+        );
+
+        let corrected_result = if !settings.custom_words.is_empty() && !is_whisper_or_groq {
             apply_custom_words(
                 &result.text,
                 &settings.custom_words,
@@ -664,12 +733,17 @@ impl TranscriptionManager {
             result.text
         };
 
-        // Filter out filler words and hallucinations
-        let filtered_result = filter_transcription_output(
-            &corrected_result,
-            &settings.app_language,
-            &settings.custom_filler_words,
-        );
+        let is_groq = matches!(engine_type, Some(EngineType::GroqWhisper));
+
+        let filtered_result = if is_groq {
+            corrected_result
+        } else {
+            filter_transcription_output(
+                &corrected_result,
+                &settings.app_language,
+                &settings.custom_filler_words,
+            )
+        };
 
         let et = std::time::Instant::now();
         let translation_note = if settings.translate_to_english {

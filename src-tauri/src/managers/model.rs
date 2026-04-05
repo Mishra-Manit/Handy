@@ -25,6 +25,7 @@ pub enum EngineType {
     SenseVoice,
     GigaAM,
     Canary,
+    GroqWhisper,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
@@ -47,6 +48,8 @@ pub struct ModelInfo {
     pub supported_languages: Vec<String>, // Languages this model can transcribe
     pub supports_language_selection: bool, // Whether the user can explicitly pick a language
     pub is_custom: bool,            // Whether this is a user-provided custom model
+    #[serde(default)]
+    pub is_cloud: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
@@ -116,6 +119,7 @@ impl ModelManager {
                 supported_languages: whisper_languages.clone(),
                 supports_language_selection: true,
                 is_custom: false,
+                is_cloud: false,
             },
         );
 
@@ -141,6 +145,7 @@ impl ModelManager {
                 supported_languages: whisper_languages.clone(),
                 supports_language_selection: true,
                 is_custom: false,
+                is_cloud: false,
             },
         );
 
@@ -165,6 +170,7 @@ impl ModelManager {
                 supported_languages: whisper_languages.clone(),
                 supports_language_selection: true,
                 is_custom: false,
+                is_cloud: false,
             },
         );
 
@@ -189,6 +195,7 @@ impl ModelManager {
                 supported_languages: whisper_languages.clone(),
                 supports_language_selection: true,
                 is_custom: false,
+                is_cloud: false,
             },
         );
 
@@ -211,9 +218,10 @@ impl ModelManager {
                 speed_score: 0.35,
                 supports_translation: false,
                 is_recommended: false,
-                supported_languages: whisper_languages,
+                supported_languages: whisper_languages.clone(),
                 supports_language_selection: true,
                 is_custom: false,
+                is_cloud: false,
             },
         );
 
@@ -239,6 +247,7 @@ impl ModelManager {
                 supported_languages: vec!["en".to_string()],
                 supports_language_selection: false,
                 is_custom: false,
+                is_cloud: false,
             },
         );
 
@@ -273,6 +282,7 @@ impl ModelManager {
                 supported_languages: parakeet_v3_languages,
                 supports_language_selection: false,
                 is_custom: false,
+                is_cloud: false,
             },
         );
 
@@ -297,6 +307,7 @@ impl ModelManager {
                 supported_languages: vec!["en".to_string()],
                 supports_language_selection: false,
                 is_custom: false,
+                is_cloud: false,
             },
         );
 
@@ -323,6 +334,7 @@ impl ModelManager {
                 supported_languages: vec!["en".to_string()],
                 supports_language_selection: false,
                 is_custom: false,
+                is_cloud: false,
             },
         );
 
@@ -349,6 +361,7 @@ impl ModelManager {
                 supported_languages: vec!["en".to_string()],
                 supports_language_selection: false,
                 is_custom: false,
+                is_cloud: false,
             },
         );
 
@@ -375,6 +388,7 @@ impl ModelManager {
                 supported_languages: vec!["en".to_string()],
                 supports_language_selection: false,
                 is_custom: false,
+                is_cloud: false,
             },
         );
 
@@ -407,6 +421,7 @@ impl ModelManager {
                 supported_languages: sense_voice_languages,
                 supports_language_selection: true,
                 is_custom: false,
+                is_cloud: false,
             },
         );
 
@@ -434,6 +449,7 @@ impl ModelManager {
                 supported_languages: gigaam_languages,
                 supports_language_selection: false,
                 is_custom: false,
+                is_cloud: false,
             },
         );
 
@@ -465,6 +481,7 @@ impl ModelManager {
                 supported_languages: canary_flash_languages,
                 supports_language_selection: true,
                 is_custom: false,
+                is_cloud: false,
             },
         );
 
@@ -499,6 +516,33 @@ impl ModelManager {
                 supported_languages: canary_1b_languages,
                 supports_language_selection: true,
                 is_custom: false,
+                is_cloud: false,
+            },
+        );
+
+        // Cloud models
+        available_models.insert(
+            "groq-whisper-turbo".to_string(),
+            ModelInfo {
+                id: "groq-whisper-turbo".to_string(),
+                name: "Groq Whisper Turbo".to_string(),
+                description: "Cloud-based transcription via Groq. Fast, no local resources needed. Requires API key.".to_string(),
+                filename: "".to_string(),
+                url: None,
+                size_mb: 0,
+                is_downloaded: true,
+                is_downloading: false,
+                partial_size: 0,
+                is_directory: false,
+                engine_type: EngineType::GroqWhisper,
+                accuracy_score: 0.90,
+                speed_score: 0.95,
+                supports_translation: true,
+                is_recommended: false,
+                supported_languages: whisper_languages.clone(),
+                supports_language_selection: true,
+                is_custom: false,
+                is_cloud: true,
             },
         );
 
@@ -615,6 +659,11 @@ impl ModelManager {
         let mut models = self.available_models.lock().unwrap();
 
         for model in models.values_mut() {
+            // Cloud models are always available — skip filesystem checks
+            if model.is_cloud {
+                continue;
+            }
+
             if model.is_directory {
                 // For directory-based models, check if the directory exists
                 let model_path = self.models_dir.join(&model.filename);
@@ -818,6 +867,7 @@ impl ModelManager {
                     supported_languages: vec![],
                     supports_language_selection: true,
                     is_custom: true,
+                    is_cloud: false,
                 },
             );
         }
@@ -1370,6 +1420,7 @@ mod tests {
                 supported_languages: vec!["en".to_string()],
                 supports_language_selection: true,
                 is_custom: false,
+                is_cloud: false,
             },
         );
 

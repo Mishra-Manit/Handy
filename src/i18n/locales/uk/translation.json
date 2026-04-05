@@ -139,7 +139,8 @@
       "translation": "Може перекладати на англійську",
       "translate": "Перекласти на англійську",
       "singleLanguage": "Підтримує лише цю мову",
-      "languageOnly": "Лише {{language}}"
+      "languageOnly": "Лише {{language}}",
+      "cloud": "Cloud"
     },
     "cancel": "Скасувати",
     "cancelDownload": "Скасувати завантаження"
@@ -206,6 +207,9 @@
         "allLanguages": "Усі мови"
       },
       "noModelsMatch": "Жодна модель не відповідає цьому фільтру.",
+      "groqApiKey": "Groq API Key",
+      "groqApiKeyDescription": "Required for Groq Whisper Turbo. Get your key at console.groq.com.",
+      "groqApiKeyPlaceholder": "gsk_...",
       "yourModels": "Завантажені моделі",
       "availableModels": "Доступні для завантаження"
     },

@@ -141,7 +141,8 @@
       "multiLanguage": "多語言",
       "languageOnly": "僅 {{language}}",
       "translation": "可翻譯為英語",
-      "translate": "翻譯為英語"
+      "translate": "翻譯為英語",
+      "cloud": "Cloud"
     }
   },
   "settings": {
@@ -207,7 +208,10 @@
         "translation": "翻譯",
         "allLanguages": "所有語言"
       },
-      "noModelsMatch": "沒有符合此篩選條件的模型"
+      "noModelsMatch": "沒有符合此篩選條件的模型",
+      "groqApiKey": "Groq API Key",
+      "groqApiKeyDescription": "Required for Groq Whisper Turbo. Get your key at console.groq.com.",
+      "groqApiKeyPlaceholder": "gsk_..."
     },
     "sound": {
       "title": "聲音",
