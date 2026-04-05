@@ -736,7 +736,7 @@ impl TranscriptionManager {
         let is_groq = matches!(engine_type, Some(EngineType::GroqWhisper));
 
         let filtered_result = if is_groq {
-            corrected_result
+            corrected_result.trim().to_string()
         } else {
             filter_transcription_output(
                 &corrected_result,
