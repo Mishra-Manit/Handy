@@ -5,6 +5,7 @@ import { ChevronDown, Globe } from "lucide-react";
 import type { ModelCardStatus } from "@/components/onboarding";
 import { ModelCard } from "@/components/onboarding";
 import { ApiKeyField } from "@/components/settings/PostProcessingSettingsApi/ApiKeyField";
+import { Textarea } from "@/components/ui/Textarea";
 import { useModelStore } from "@/stores/modelStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { LANGUAGES } from "@/lib/constants/languages.ts";
@@ -23,8 +24,11 @@ export const ModelsSettings: React.FC = () => {
   const [languageSearch, setLanguageSearch] = useState("");
   const languageDropdownRef = useRef<HTMLDivElement>(null);
   const languageSearchInputRef = useRef<HTMLInputElement>(null);
-  const { settings, updatePostProcessApiKey } = useSettingsStore();
+  const { settings, updatePostProcessApiKey, updateSetting } = useSettingsStore();
   const groqApiKey = settings?.post_process_api_keys?.groq ?? "";
+  const groqPrompt = settings?.groq_whisper_prompt ?? "";
+  const [localPrompt, setLocalPrompt] = React.useState<string | null>(null);
+  const promptValue = localPrompt ?? groqPrompt;
 
   const {
     models,
@@ -332,19 +336,43 @@ export const ModelsSettings: React.FC = () => {
               />
             ))}
             {currentModel === "groq-whisper-turbo" && (
-              <div className="mt-3 p-4 rounded-xl border-2 border-mid-gray/20 space-y-2">
-                <label className="text-sm font-medium text-text/80">
-                  {t("settings.models.groqApiKey")}
-                </label>
-                <p className="text-xs text-text/50">
-                  {t("settings.models.groqApiKeyDescription")}
-                </p>
-                <ApiKeyField
-                  value={groqApiKey}
-                  onBlur={(value: string) => updatePostProcessApiKey("groq", value)}
-                  disabled={false}
-                  placeholder={t("settings.models.groqApiKeyPlaceholder")}
-                />
+              <div className="mt-3 p-4 rounded-xl border-2 border-mid-gray/20 space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-text/80">
+                    {t("settings.models.groqApiKey")}
+                  </label>
+                  <p className="text-xs text-text/50">
+                    {t("settings.models.groqApiKeyDescription")}
+                  </p>
+                  <ApiKeyField
+                    value={groqApiKey}
+                    onBlur={(value: string) => updatePostProcessApiKey("groq", value)}
+                    disabled={false}
+                    placeholder={t("settings.models.groqApiKeyPlaceholder")}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-text/80">
+                    Prompt
+                  </label>
+                  <p className="text-xs text-text/50">
+                    Instructions passed to Whisper on every transcription. Use this to
+                    control formatting, remove filler words, or add custom style rules.
+                  </p>
+                  <Textarea
+                    className="w-full min-h-[120px] text-xs"
+                    value={promptValue}
+                    onChange={(e) => setLocalPrompt(e.target.value)}
+                    onBlur={() => {
+                      if (localPrompt !== null && localPrompt !== groqPrompt) {
+                        updateSetting("groq_whisper_prompt", localPrompt);
+                      }
+                      setLocalPrompt(null);
+                    }}
+                    placeholder="Enter instructions for Whisper..."
+                    spellCheck={false}
+                  />
+                </div>
               </div>
             )}
           </div>

@@ -650,6 +650,18 @@ pub fn update_custom_words(app: AppHandle, words: Vec<String>) -> Result<(), Str
 
 #[tauri::command]
 #[specta::specta]
+pub fn change_groq_whisper_prompt_setting(
+    app: AppHandle,
+    prompt: String,
+) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.groq_whisper_prompt = prompt;
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
 pub fn change_word_correction_threshold_setting(
     app: AppHandle,
     threshold: f64,

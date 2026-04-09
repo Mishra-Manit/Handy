@@ -651,6 +651,7 @@ impl TranscriptionManager {
                                         &audio,
                                         groq_language.as_deref(),
                                         &settings.custom_words,
+                                        &settings.groq_whisper_prompt,
                                     ),
                                 )
                             })?;

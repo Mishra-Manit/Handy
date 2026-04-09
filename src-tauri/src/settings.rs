@@ -399,6 +399,8 @@ pub struct AppSettings {
     pub ort_accelerator: OrtAcceleratorSetting,
     #[serde(default)]
     pub extra_recording_buffer_ms: u64,
+    #[serde(default = "default_groq_whisper_prompt")]
+    pub groq_whisper_prompt: String,
 }
 
 fn default_model() -> String {
@@ -473,7 +475,7 @@ fn default_sound_theme() -> SoundTheme {
 }
 
 fn default_post_process_enabled() -> bool {
-    false
+    true
 }
 
 fn default_app_language() -> String {
@@ -487,7 +489,7 @@ fn default_show_tray_icon() -> bool {
 }
 
 fn default_post_process_provider_id() -> String {
-    "openai".to_string()
+    "groq".to_string()
 }
 
 fn default_post_process_providers() -> Vec<PostProcessProvider> {
@@ -583,6 +585,9 @@ fn default_model_for_provider(provider_id: &str) -> String {
     if provider_id == APPLE_INTELLIGENCE_PROVIDER_ID {
         return APPLE_INTELLIGENCE_DEFAULT_MODEL_ID.to_string();
     }
+    if provider_id == "groq" {
+        return "llama-3.3-70b-versatile".to_string();
+    }
     String::new()
 }
 
@@ -603,6 +608,13 @@ fn default_post_process_prompts() -> Vec<LLMPrompt> {
         name: "Improve Transcriptions".to_string(),
         prompt: "Clean this transcript:\n1. Fix spelling, capitalization, and punctuation errors\n2. Convert number words to digits (twenty-five → 25, ten percent → 10%, five dollars → $5)\n3. Replace spoken punctuation with symbols (period → ., comma → ,, question mark → ?)\n4. Remove filler words (um, uh, like as filler)\n5. Keep the language in the original version (if it was french, keep it in french for example)\n\nPreserve exact meaning and word order. Do not paraphrase or reorder content.\n\nReturn only the cleaned transcript.\n\nTranscript:\n${output}".to_string(),
     }]
+}
+
+fn default_groq_whisper_prompt() -> String {
+    "Remove filler words (um, uh, like, you know, so, basically, \
+        actually, right, well). Format the text into clean paragraphs. Use bullet points \
+        where the speaker lists items. Use proper punctuation and capitalization."
+        .to_string()
 }
 
 fn default_typing_tool() -> TypingTool {
@@ -753,7 +765,7 @@ pub fn get_default_settings() -> AppSettings {
         post_process_api_keys: default_post_process_api_keys(),
         post_process_models: default_post_process_models(),
         post_process_prompts: default_post_process_prompts(),
-        post_process_selected_prompt_id: None,
+        post_process_selected_prompt_id: Some("default_improve_transcriptions".to_string()),
         mute_while_recording: false,
         append_trailing_space: false,
         app_language: default_app_language(),
@@ -768,6 +780,7 @@ pub fn get_default_settings() -> AppSettings {
         whisper_accelerator: WhisperAcceleratorSetting::default(),
         ort_accelerator: OrtAcceleratorSetting::default(),
         extra_recording_buffer_ms: 0,
+        groq_whisper_prompt: default_groq_whisper_prompt(),
     }
 }
 

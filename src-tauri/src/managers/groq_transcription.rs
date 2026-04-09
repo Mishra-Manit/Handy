@@ -15,19 +15,15 @@ const GROQ_TRANSCRIPTION_URL: &str = "https://api.groq.com/openai/v1/audio/trans
 const GROQ_MODEL: &str = "whisper-large-v3-turbo";
 
 /// Build the prompt string combining custom words (for vocabulary recognition)
-/// and formatting instructions (filler removal, paragraph/bullet formatting).
+/// and a user-configurable base prompt (formatting / style instructions).
 ///
 /// Whisper's `prompt` parameter is used both as a vocabulary hint and as a
 /// loose instruction channel. Groq's implementation honors this field.
-fn build_prompt(custom_words: &[String]) -> String {
-    let instructions = "Remove filler words (um, uh, like, you know, so, basically, \
-        actually, right, well). Format the text into clean paragraphs. Use bullet points \
-        where the speaker lists items. Use proper punctuation and capitalization.";
-
+fn build_prompt(base_prompt: &str, custom_words: &[String]) -> String {
     if custom_words.is_empty() {
-        instructions.to_string()
+        base_prompt.to_string()
     } else {
-        format!("Vocabulary: {}\n\n{}", custom_words.join(", "), instructions)
+        format!("Vocabulary: {}\n\n{}", custom_words.join(", "), base_prompt)
     }
 }
 
@@ -68,6 +64,7 @@ pub async fn transcribe_with_groq(
     audio: &[f32],
     language: Option<&str>,
     custom_words: &[String],
+    base_prompt: &str,
 ) -> Result<String> {
     if api_key.is_empty() {
         return Err(anyhow::anyhow!(
@@ -84,7 +81,7 @@ pub async fn transcribe_with_groq(
         audio.len()
     );
 
-    let prompt = build_prompt(custom_words);
+    let prompt = build_prompt(base_prompt, custom_words);
 
     let client = &*GROQ_CLIENT;
     let file_part = reqwest::multipart::Part::bytes(wav_bytes)

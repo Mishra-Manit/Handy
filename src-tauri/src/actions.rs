@@ -431,7 +431,7 @@ impl ShortcutAction for TranscribeAction {
         play_feedback_sound(app, SoundType::Stop);
 
         let binding_id = binding_id.to_string(); // Clone binding_id for the async task
-        let post_process = self.post_process;
+        let post_process = self.post_process || get_settings(app).post_process_enabled;
 
         tauri::async_runtime::spawn(async move {
             let _guard = FinishGuard(ah.clone());
